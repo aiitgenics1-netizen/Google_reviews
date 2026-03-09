@@ -1,0 +1,673 @@
+
+
+
+{% comment %} 
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Reviews Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-100">
+    
+
+<div class="max-w-5xl mx-auto py-10 px-6">
+
+<!-- BUSINESS HEADER -->
+
+<div class="mb-8">
+
+<h1 class="text-3xl font-bold mb-2">
+{{ business.name }}
+</h1>
+
+<div class="text-gray-600">
+Total Reviews: {{ business.total_reviews }}
+</div>
+
+</div>
+
+
+<!-- POSITIVE / NEGATIVE STATS -->
+
+<div class="grid grid-cols-2 gap-6 mb-10">
+
+<div class="bg-green-100 p-6 rounded-lg shadow">
+
+<div class="text-gray-700">
+Positive Reviews
+</div>
+
+<div class="text-3xl font-bold text-green-700">
+{{ positive }}
+</div>
+
+</div>
+
+<div class="bg-red-100 p-6 rounded-lg shadow">
+
+<div class="text-gray-700">
+Negative Reviews
+</div>
+
+<div class="text-3xl font-bold text-red-700">
+{{ negative }}
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- FILTERS -->
+
+<form method="GET" class="flex gap-4 mb-10">
+
+<select name="rating" class="border p-2 rounded">
+
+<option value="">All Ratings</option>
+<option value="1">⭐ 1 Star</option>
+<option value="2">⭐ 2 Star</option>
+<option value="3">⭐ 3 Star</option>
+<option value="4">⭐ 4 Star</option>
+<option value="5">⭐ 5 Star</option>
+
+</select>
+
+<button class="bg-blue-500 text-white px-4 py-2 rounded">
+Filter
+</button>
+
+</form>
+
+
+<!-- NAME SEARCH -->
+
+<form method="GET" class="mb-10">
+
+<input
+type="text"
+name="names"
+placeholder="Enter names: John, Mike, Anna"
+class="border p-3 w-full rounded"
+/>
+
+<button class="mt-3 bg-purple-500 text-white px-5 py-2 rounded">
+Check Names
+</button>
+
+</form>
+
+
+
+<!-- MATCHED REVIEWS -->
+
+{% if matched_reviews %}
+
+<div class="bg-yellow-100 p-5 rounded mb-10">
+
+<h2 class="font-bold mb-3 text-lg">
+Matched Reviews
+</h2>
+
+{% for r in matched_reviews %}
+
+<div class="mb-2">
+
+{{ r.reviewer_name }} ⭐{{ r.rating }}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+
+
+<!-- REVIEWS LIST -->
+
+<div class="space-y-6">
+
+{% for r in reviews %}
+
+<div
+class="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-lg transition"
+onclick="toggleReview({{ r.id }})"
+>
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center mb-2">
+
+<div class="font-semibold text-lg">
+{{ r.reviewer_name }}
+</div>
+
+<div class="flex text-yellow-500">
+
+{% for i in "12345" %}
+
+{% if forloop.counter <= r.rating %}
+★
+{% else %}
+☆
+{% endif %}
+
+{% endfor %}
+
+</div>
+
+</div>
+
+<!-- DATE -->
+
+<div class="text-sm text-gray-500 mb-3">
+{{ r.review_date|date:"Y-m-d" }}
+</div>
+
+
+<!-- SHORT REVIEW -->
+
+<div id="short-{{ r.id }}" class="text-gray-700">
+
+{{ r.text|truncatewords:20 }}
+
+</div>
+
+
+<!-- FULL REVIEW -->
+
+<div id="full-{{ r.id }}" class="hidden mt-3 text-gray-700">
+
+<div class="mb-3">
+{{ r.text }}
+</div>
+
+
+<!-- OWNER REPLY -->
+
+{% if r.response %}
+
+<div class="mt-4 p-4 bg-gray-100 rounded-lg">
+
+<div class="font-semibold mb-1">
+Owner Reply
+</div>
+
+<div class="text-sm">
+{{ r.response }}
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+
+
+<!-- TOGGLE SCRIPT -->
+
+<script>
+
+function toggleReview(id){
+
+let shortText = document.getElementById("short-" + id)
+let fullText = document.getElementById("full-" + id)
+
+if(fullText.classList.contains("hidden")){
+    fullText.classList.remove("hidden")
+    shortText.classList.add("hidden")
+}else{
+    fullText.classList.add("hidden")
+    shortText.classList.remove("hidden")
+}
+
+}
+
+</script>
+
+
+</body>
+
+</html> {% endcomment %}
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews Dashboard - Review Monitor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .gradient-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+  
+  .gradient-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+  
+  .card-shadow {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  .input-focus {
+    transition: all 0.3s ease;
+  }
+  
+  .input-focus:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .review-card-item {
+    transition: all 0.3s ease;
+  }
+  
+  .review-card-item:hover {
+    transform: translateY(-2px);
+  }
+</style>
+
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
+
+<!-- HEADER -->
+<header class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="gradient-bg p-2 rounded-lg">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900">Review Monitor</h2>
+    </div>
+    <nav class="flex gap-4">
+      <a href="/" class="text-gray-700 hover:text-gray-900 font-medium">Home</a>
+      <a href="{% url 'business_list' %}" class="text-gray-700 hover:text-gray-900 font-medium">Businesses</a>
+    </nav>
+  </div>
+</header>
+
+<div class="flex-1 max-w-5xl mx-auto w-full py-10 px-4">
+
+<!-- HEADER -->
+<div class="flex justify-between items-start mb-8">
+  <div class="flex-1">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="gradient-bg p-3 rounded-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-4xl font-bold text-gray-900">{{ business.name }}</h1>
+        <p class="text-gray-600 text-sm mt-1 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          {{ business.address }}
+        </p>
+      </div>
+    </div>
+  </div>
+  {% comment %} <a href="/businesses/"
+    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg transition flex items-center gap-2">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+  </a> {% endcomment %}
+</div>
+
+<!-- STATS -->
+<div class="grid md:grid-cols-2 gap-6 mb-10">
+  <div class="gradient-success text-white p-8 rounded-xl card-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-green-100 text-sm font-medium">Positive Reviews</p>
+        <p class="text-5xl font-bold mt-2">{{ positive }}</p>
+      </div>
+      <svg class="w-16 h-16 text-green-200" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+  </div>
+
+  <div class="gradient-danger text-white p-8 rounded-xl card-shadow">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-red-100 text-sm font-medium">Negative Reviews</p>
+        <p class="text-5xl font-bold mt-2">{{ negative }}</p>
+      </div>
+      <svg class="w-16 h-16 text-red-200" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER SECTION -->
+<div class="bg-white rounded-xl card-shadow p-6 mb-10">
+  <div class="grid md:grid-cols-2 gap-4">
+    <!-- REVIEWER SEARCH -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Search Reviewer</label>
+      <input
+      id="reviewSearch"
+      type="text"
+      placeholder="Enter reviewer name..."
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    <!-- RATING FILTER -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Filter by Rating</label>
+      <select
+      id="ratingFilter"
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+      >
+      <option value="">All Ratings</option>
+      <option value="1">⭐ 1 Star</option>
+      <option value="2">⭐ 2 Stars</option>
+      <option value="3">⭐ 3 Stars</option>
+      <option value="4">⭐ 4 Stars</option>
+      <option value="5">⭐ 5 Stars</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div id="reviewsContainer" class="space-y-4">
+
+{% for r in reviews %}
+<div
+class="review-card-item bg-white rounded-xl card-shadow p-6 cursor-pointer"
+data-name="{{ r.reviewer_name|lower }}"
+data-rating="{{ r.rating }}"
+onclick="toggleReview({{ r.id }})"
+>
+  <!-- REVIEW HEADER -->
+  <div class="flex justify-between items-start mb-3">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-900">{{ r.reviewer_name }}</h3>
+      <p class="text-sm text-gray-500 mt-1">{{ r.review_date|date:"M d, Y" }}</p>
+    </div>
+    <div class="flex gap-1">
+      {% for i in "12345" %}
+        {% if forloop.counter <= r.rating %}
+          <span class="text-yellow-400 text-xl">★</span>
+        {% else %}
+          <span class="text-gray-300 text-xl">☆</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- SHORT REVIEW -->
+  <div id="short-{{ r.id }}" class="text-gray-700 text-sm leading-relaxed">
+    {{ r.text|truncatewords:20 }}
+  </div>
+
+  <!-- FULL REVIEW -->
+  <div id="full-{{ r.id }}" class="hidden mt-4">
+    <p class="text-gray-700 text-sm leading-relaxed mb-4">{{ r.text }}</p>
+
+    <!-- OWNER REPLY -->
+    {% if r.response %}
+    <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+      <p class="text-sm font-semibold text-blue-900 mb-2">🏢 Business Owner Reply</p>
+      <p class="text-sm text-blue-800">{{ r.response }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<!-- No Results Message -->
+<div id="noReviews" class="hidden text-center py-16">
+  <svg class="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+  <p class="text-gray-500 text-lg">No reviews found matching your filters</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-300 mt-16 w-full">
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid md:grid-cols-3 gap-8 mb-8">
+      <div>
+        <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+          <div class="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+            </svg>
+          </div>
+          Review Monitor
+        </h3>
+        <p class="text-sm">Manage and monitor Google Maps reviews efficiently</p>
+      </div>
+      <div>
+        <h3 class="text-white font-bold mb-4">Quick Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/" class="hover:text-white transition">Home</a></li>
+          <li><a href="{% url 'business_list' %}" class="hover:text-white transition">View Businesses</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-white font-bold mb-4">Features</h3>
+        <ul class="space-y-2 text-sm">
+          <li>📊 Review Analytics</li>
+          <li>🔍 Advanced Search</li>
+          <li>⭐ Rating Tracking</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 pt-8 text-center text-sm">
+      <p>&copy; 2026 Review Monitor. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+/* EXPAND REVIEW */
+function toggleReview(id){
+  let shortText = document.getElementById("short-" + id)
+  let fullText = document.getElementById("full-" + id)
+
+  if(fullText.classList.contains("hidden")){
+    fullText.classList.remove("hidden")
+    shortText.classList.add("hidden")
+  }else{
+    fullText.classList.add("hidden")
+    shortText.classList.remove("hidden")
+  }
+}
+
+/* LIVE REVIEWER SEARCH */
+const searchInput = document.getElementById("reviewSearch")
+
+searchInput.addEventListener("input", function(){
+  let value = searchInput.value.toLowerCase()
+  let visibleCount = 0
+
+  document.querySelectorAll(".review-card-item").forEach(card => {
+    let name = card.dataset.name
+
+    if(name.includes(value)){
+      card.style.display = "block"
+      visibleCount++
+    }else{
+      card.style.display = "none"
+    }
+  })
+  
+  updateNoResults(visibleCount)
+})
+
+/* RATING FILTER */
+const ratingFilter = document.getElementById("ratingFilter")
+
+ratingFilter.addEventListener("change", function(){
+  let rating = ratingFilter.value
+  let visibleCount = 0
+
+  document.querySelectorAll(".review-card-item").forEach(card => {
+    let cardRating = card.dataset.rating
+
+    if(rating === "" || rating === cardRating){
+      card.style.display = "block"
+      visibleCount++
+    }else{
+      card.style.display = "none"
+    }
+  })
+  
+  updateNoResults(visibleCount)
+})
+
+/* UPDATE NO RESULTS MESSAGE */
+function updateNoResults(count) {
+  const noReviews = document.getElementById("noReviews")
+  if(count === 0) {
+    noReviews.classList.remove("hidden")
+  } else {
+    noReviews.classList.add("hidden")
+  }
+}
+
+</script>
+
+</body>
+
+</html>
+  </svg>
+ 
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* EXPAND REVIEW */
+
+function toggleReview(id){
+
+let shortText = document.getElementById("short-" + id)
+let fullText = document.getElementById("full-" + id)
+
+if(fullText.classList.contains("hidden")){
+
+fullText.classList.remove("hidden")
+shortText.classList.add("hidden")
+
+}else{
+
+fullText.classList.add("hidden")
+shortText.classList.remove("hidden")
+
+}
+
+}
+
+
+
+/* LIVE REVIEWER SEARCH */
+
+const searchInput = document.getElementById("reviewSearch")
+
+searchInput.addEventListener("input", function(){
+
+let value = searchInput.value.toLowerCase()
+
+document.querySelectorAll(".review-card").forEach(card => {
+
+let name = card.dataset.name
+
+if(name.includes(value)){
+card.style.display = "block"
+}else{
+card.style.display = "none"
+}
+
+})
+
+})
+
+
+
+/* RATING FILTER */
+
+const ratingFilter = document.getElementById("ratingFilter")
+
+ratingFilter.addEventListener("change", function(){
+
+let rating = ratingFilter.value
+
+document.querySelectorAll(".review-card").forEach(card => {
+
+let cardRating = card.dataset.rating
+
+if(rating === "" || rating === cardRating){
+card.style.display = "block"
+}else{
+card.style.display = "none"
+}
+
+})
+
+})
+
+
+</script>
+
+
+</body>
+</html>
+
