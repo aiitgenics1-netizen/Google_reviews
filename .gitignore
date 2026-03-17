@@ -1,4 +1,24 @@
 .venv/
 .env
+.env.local
 __pycache__/
 *.pyc
+*.py[cod]
+
+# Database
+db.sqlite3
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Django
+staticfiles/
+/static/
+media/
+*.log
+
+# Vercel
+.vercel
