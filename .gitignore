@@ -15,7 +15,7 @@ db.sqlite3
 *.swp
 
 # Django
-staticfiles/
+
 /static/
 media/
 *.log
