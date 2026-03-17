@@ -94,13 +94,12 @@ def Home(request):
 
     return render(
         request,
-        "Home/index.html",
+        "home/index.html",
         {
             "message": message,
             "message_type": message_type
         }
     )
-
 
 
 def reviews_dashboard(request, business_id):
@@ -154,7 +153,7 @@ def reviews_dashboard(request, business_id):
 
     return render(
         request,
-        "Home/reviews_dashboard.html",
+        "home/reviews_dashboard.html",
         context
     )
 
@@ -213,6 +212,6 @@ def business_list(request):
 
         return JsonResponse({"businesses": data})
 
-    return render(request, "Home/business_list.html", {
+    return render(request, "home/business_list.html", {
         "businesses": businesses
     })
